@@ -1,0 +1,91 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+
+  <title>Interface de controle d'objets connectes</title>
+  <meta name="description" content="The HTML5 Herald">
+  <meta name="author" content="SitePoint">
+<!--
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/1.20.3/plugins/CSSPlugin.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/1.20.3/easing/EasePack.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/1.20.3/TweenLite.min.js"></script>
+-->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.4/socket.io.js"></script>
+<!--
+<script src="https://d3js.org/d3.v4.min.js"></script>
+<script src="https://code.jquery.com/jquery-1.9.1.min.js"></script>
+<link href="forme.css" rel="stylesheet" type='text/css'>
+-->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <script>
+	var socket = io('192.168.43.237:3000/');
+
+  function start() { 
+        
+    socket.on('connected', function(msg) {
+        console.log('connected to server');
+    });  
+ }
+    function allume(){
+	socket.emit('controleLed8266','1');
+	console.log('Message transmis');
+    }
+    function eteint(){
+	socket.emit('controleLed8266','0');
+	console.log('Message transmis');
+    }
+    socket.on('message8266', function(msg) {
+	console.log(msg);
+	document.getElementById('temp').innerHTML = msg.temperature;
+	document.getElementById('hum').innerHTML = msg.humidite;
+	if(msg.ledStatus == "1")
+	     document.getElementById('status').innerHTML = "Allumee";
+	else
+	     document.getElementById('status').innerHTML = "Eteinte";
+    });
+    
+ window.addEventListener('DOMContentLoader', start);
+  </script>
+  
+  
+</head>
+
+<body>
+<div class="container">
+	<div class="row">
+		<div class="col-sm-2">
+		</div>
+		<div class="col-sm-8">
+<h1 align='center'>Controle de ESP8266</h1>
+</div>
+<hr align="center" width=80% size=8 color=black>
+<div>
+<br/><br/>
+<br/><br/>
+
+<font size=6>Etat de la led : <b id="status"></b></font>
+<font size=6><br/>
+Led control :</font><font> 
+<input  type="button" value=" On " onclick='allume()'>
+<input  type="button" value=" Off " onclick='eteint()'>
+<br/>
+<br/>
+<p>Temperature : <b id="temp"></b></p>
+<p>Humidity : <b id="hum"></b></p>
+</font>
+<br/><br/>
+
+<font size=5>Return to : <a href='http://192.168.43.237:3000/'>home page</a>
+</font>
+
+<br/>
+<p>For more information, <a href=''> contact us </a></p>
+		<div class="col-sm-2">
+		</div>
+		</div>
+	</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,185 @@
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Interface de controle d'objets connectes</title>
+    <title>My first gauge using FusionWidgets XT</title>
+    <script type="text/javascript" src="fusioncharts/js/fusioncharts.js"></script>
+    <script type="text/javascript" src="fusioncharts/js/themes/fusioncharts.theme.fint.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.4/socket.io.js"></script>
+
+    <script type="text/javascript">
+	var messager;
+	var ancien;
+
+	var socket = io('192.168.43.237:3000/');
+
+  	function start() {         
+		socket.on('connected', function(msg) {
+        	console.log('connected to server');
+    		});  
+  	}
+    	function allume(){
+		socket.emit('controleLed8266','1');
+		console.log('Message transmis');
+    	}
+    	function eteint(){
+		socket.emit('controleLed8266','0');
+		console.log('Message transmis');
+    	}
+	socket.on('message8266', function(msg) {
+		console.log(msg);
+		messager = msg.humidite;
+		if(messager !=ancien){		
+			//FusionCharts.dataSource= "value="+messager;
+			ancien = messager;
+		}
+		document.getElementById('temp').innerHTML = msg.temperature;
+		document.getElementById('hum').innerHTML = msg.humidite;
+		if(msg.ledStatus == "1")
+	     		document.getElementById('status').innerHTML = "Allumee";
+		else
+	     		document.getElementById('status').innerHTML = "Eteinte";		
+    	});
+/*
+setInterval(function(){
+	csatGauge.setJSONData({
+	
+		"value":"100"
+	});
+}, 3000);
+*/
+
+
+
+        FusionCharts.ready(function() { 
+            var  csatGauge =   new  FusionCharts({
+                "type" :  "angulargauge",
+                "renderAt" :  "chart-container",
+                "width" :  "400",
+                "height" :  "250",
+                "dataFormat" :  "json",
+                "dataSource" :  {
+                    "chart" :  {
+                        "caption" :  "Environment Humidity view",
+                        "subcaption" :  "Value in %",
+                        "lowerLimit" :  "0",
+                        "upperLimit" :  "100",
+			"gaugeFillMix" : "{dark-30},{light-60},{dark-10}",
+			"gaugeFillRatio" : "15",
+			"pivotRadius": "10",
+			"showValue" : "1",
+			"valueBelowPivot" : "1",
+			"editMode" : "1",
+			//"majorTMNumber" : "9",
+			//"minorTMNumber" : "4",
+                        "theme" :  "fint"
+                    },
+                    "colorRange" :  {
+                        "color" :  [{
+                                "minValue" :  "0",
+                                "maxValue" :  "10",
+                                "code" :  "#e44a00"
+                            },
+                            {
+                                "minValue" :  "10",
+                                "maxValue" :  "25",
+                                "code" :  "#f8bd19"
+                            },
+                            {
+                                "minValue" :  "25",
+                                "maxValue" :  "75",
+                                "code" :  "#6baa01"
+                            },
+                            {
+                                "minValue" :  "75",
+                                "maxValue" :  "90",
+                                "code" :  "#f8bd19"
+                            },
+                            {
+                                "minValue" :  "90",
+                                "maxValue" :  "100",
+                                "code" :  "#e44a00"
+                            }
+                        ]
+                    },
+                    "dials" :  {
+                        "dial" :  [{	
+                            "id" : "affiche1",
+                            "value" :  78,
+                            "showValue" : "1",
+                            "tooltext": "current year's average : $value",
+                            "rearExtension" : "5"
+                        }]
+                    }
+                },
+                
+                events: {
+        'beforeRender': function(evt, args) {
+            var score = document.createElement('div');
+            score.setAttribute('id', 'score-detail');
+            score.innerHTML = 'Current humidity value is: <b>78</b>';
+            score.style.cssText = "font-family:'Helvetica Neue', Arial; font-size: 14px; padding:10px 0 10px 20px;";
+            args.container.parentNode.insertBefore(score, args.container.nextSibling);
+        },
+        "rendered": function(evtObj, argObj) {
+            evtObj.sender.intervalVar = setInterval(function() {
+                var chartIns = evtObj.sender,
+                    prcnt = 65 + parseInt(Math.floor(Math.random() * 10), 10);
+
+                chartIns.feedData("value=" + messager);
+
+            }, 3000);
+        },
+        "realtimeUpdateComplete": function(evtObj, argObj) {
+            var updtObj = argObj && argObj.updateObject,
+                values = updtObj && updtObj.values,
+                updtValStr = values && values[0],
+                updtVal = updtValStr &&
+                parseFloat(updtValStr).toFixed(0),
+                divToUpdate = document.getElementById("score-detail");
+
+            divToUpdate.innerHTML = "Current server CPU Utilization is : <b>" + updtVal + "</b>";
+
+
+        },
+        "disposed": function(evtObj, argObj) {
+            clearInterval(evtObj.sender.intervalVar);
+        }
+    }
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+            });
+            csatGauge.render();	
+        });	
+
+
+
+    </script>
+</head>
+
+<body>
+    <h1 align="center">Controle de l'objet ESP8266</h1>
+    <hr align="center" width=80% size=4 color=black>
+    <div id="chart-container">An angular gauge will load here!</div>
+    <br/>
+	<font size=6>Etat de la led : <b id="status"></b></font>
+	<font size=6><br/>Led control :</font> 
+<input  type="button" value=" On " onclick='allume()'>
+<input  type="button" value=" Off " onclick='eteint()'>
+<br/>
+<br/>
+<p>Temperature : <b id="temp"></b></p>
+<p>Humidity : <b id="hum"></b></p>
+</body>
+
+</html>

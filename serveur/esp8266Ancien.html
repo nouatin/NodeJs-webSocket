@@ -1,0 +1,138 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+
+  <title>Interface de controle d'objets connectes</title>
+  <meta name="description" content="The HTML5 Herald">
+  <meta name="author" content="SitePoint">
+<!--
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/1.20.3/plugins/CSSPlugin.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/1.20.3/easing/EasePack.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/1.20.3/TweenLite.min.js"></script>
+-->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.4/socket.io.js"></script>
+<!--
+<script src="https://d3js.org/d3.v4.min.js"></script>
+<script src="https://code.jquery.com/jquery-1.9.1.min.js"></script>
+<link href="forme.css" rel="stylesheet" type='text/css'>
+-->
+<!-- 3 librairies for charts -->
+    <title>My first gauge using FusionWidgets XT</title>
+    <script type="text/javascript" src="fusioncharts/js/fusioncharts.js"></script>
+    <script type="text/javascript" src="fusioncharts/js/themes/fusioncharts.theme.fint.js"></script>
+
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <script type="text/javascript">
+
+	var socket = io('192.168.43.237:3000/');
+
+  	function start() {         
+		socket.on('connected', function(msg) {
+        	console.log('connected to server');
+    		});  
+  	}
+    	function allume(){
+		socket.emit('controleLed8266','1');
+		console.log('Message transmis');
+    	}
+    	function eteint(){
+		socket.emit('controleLed8266','0');
+		console.log('Message transmis');
+    	}
+    	socket.on('message8266', function(msg) {
+		console.log(msg);
+		document.getElementById('temp').innerHTML = msg.temperature;
+		document.getElementById('hum').innerHTML = msg.humidite;
+		if(msg.ledStatus == "1")
+	     		document.getElementById('status').innerHTML = "Allumee";
+		else
+	     		document.getElementById('status').innerHTML = "Eteinte";
+    	});
+    	FusionCharts.ready(  function  () { 
+            var  csatGauge =   new  FusionCharts({
+                "type" :  "angulargauge",
+                "renderAt" :  "chart-container",
+                "width" :  "400",
+                "height" :  "250",
+                "dataFormat" :  "json",
+                "dataSource" :  {
+                    "chart" :  {
+                        "caption" :  "Customer Satisfaction Score",
+                        "subcaption" :  "Last week",
+                        "lowerLimit" :  "0",
+                        "upperLimit" :  "100",
+                        "theme" :  "fint"
+                    },
+                    "colorRange" :  {
+                        "color" :  [{
+                                "minValue" :  "0",
+                                "maxValue" :  "50",
+                                "code" :  "#e44a00"
+                            },
+                            {
+                                "minValue" :  "50",
+                                "maxValue" :  "75",
+                                "code" :  "#f8bd19"
+                            },
+                            {
+                                "minValue" :  "75",
+                                "maxValue" :  "100",
+                                "code" :  "#6baa01"
+                            }
+                        ]
+                    },
+                    "dials" :  {
+                        "dial" :  [{
+                            "value" :  "67"
+                        }]
+                    }
+                }
+            });
+
+            csatGauge.render();
+        });
+ window.addEventListener('DOMContentLoader', start);
+  </script>
+  
+  
+</head>
+
+<body>
+<div id="chart-container">An angular gauge will load here!</div>
+</body>
+<h1 align='center'>Controle de ESP8266</h1>
+
+<hr align="center" width=80% size=8 color=black>
+<div>
+<br/><br/>
+<br/><br/>
+
+<font size=6>Etat de la led : <b id="status"></b></font>
+<font size=6><br/>
+Led control :</font><font> 
+<input  type="button" value=" On " onclick='allume()'>
+<input  type="button" value=" Off " onclick='eteint()'>
+<br/>
+<br/>
+<p>Temperature : <b id="temp"></b></p>
+<p>Humidity : <b id="hum"></b></p>
+</font>
+<br/>
+
+<div id="chart-container">An angular gauge will load here!</div>
+
+
+<font size=5>Return to : <a href='http://192.168.43.237:3000/'>home page</a>
+</font>
+
+<br/>
+<p>For more information, <a href=''> contact us </a></p>
+
+
+
+</div>
+<!--</body>
+-->
+</html>
